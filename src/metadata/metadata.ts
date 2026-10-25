@@ -23,14 +23,29 @@ export async function inspectMetadata(inputPath: string, maxItems = 200): Promis
 
   // Images via sharp
   if (["jpg","jpeg","png","gif","webp","bmp","tiff","tif"].includes(ext)) {
+    let sharpOk = false;
     try {
       const sharp = (await import("sharp")).default;
       const meta = await sharp(p).metadata();
       for (const [k, v] of Object.entries(meta)) {
         if (v !== undefined) fields.push({ key: `image.${k}`, value: v, source: "sharp" });
       }
+      sharpOk = true;
     } catch (e: any) {
       errors.push(`sharp metadata failed: ${e?.message ?? e}`);
+    }
+    if (!sharpOk) {
+      try {
+        const { parseImageHeader } = await import("../analysis/imageHeader.js");
+        const buf = fs.readFileSync(p);
+        const h = parseImageHeader(buf);
+        if (h) {
+          if (h.width) fields.push({ key: "image.width", value: h.width, source: "header parse (fallback)" });
+          if (h.height) fields.push({ key: "image.height", value: h.height, source: "header parse (fallback)" });
+          if (h.bits) fields.push({ key: "image.bits", value: h.bits, source: "header parse (fallback)" });
+          fields.push({ key: "image.format", value: h.format, source: "header parse (fallback)" });
+        }
+      } catch {}
     }
   }
 

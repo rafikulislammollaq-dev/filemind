@@ -40,10 +40,26 @@ export async function recoverFile(inputPath: string, outputDir?: string, strateg
   let validation: any = null;
 
   if (strategy === "auto") {
-    if (ext === "pdf") method = "pdf_text_extraction";
-    else if (ext === "sqlite" || ext === "db") method = "sqlite_check";
+    if (ext === "pdf") {
+      try {
+        const { PDFParse } = await import("pdf-parse");
+        const parser = new PDFParse({ data: fs.readFileSync(p) });
+        await parser.getText();
+        method = "pdf_text_extraction";
+      } catch {
+        method = "pdf_repair";
+      }
+    } else if (ext === "sqlite" || ext === "db") method = "sqlite_check";
     else if (ext === "zip" || id.detected?.ext === "zip") method = "zip_extract_intact";
-    else if (["jpg","jpeg","png","gif","webp","bmp","tiff","tif"].includes(ext)) method = "image_decode";
+    else if (["jpg","jpeg","png","gif","webp","bmp","tiff","tif"].includes(ext)) {
+      try {
+        const sharp = (await import("sharp")).default;
+        await sharp(p).metadata();
+        method = "image_decode";
+      } catch {
+        method = "image_repair_python";
+      }
+    }
     else if (["txt","md","json","xml","yaml","yml","csv","log"].includes(ext)) method = "text_normalize";
     else method = "generic_copy";
   }
@@ -165,6 +181,24 @@ export async function recoverFile(inputPath: string, outputDir?: string, strateg
         remaining.push(e?.message ?? String(e));
         classification = "failed";
         summary = "Image transcode failed";
+      }
+    } else if (method === "image_repair_python") {
+      const { pythonPilAvailable, repairImageWithPil } = await import("../adapters/pythonImageAdapter.js");
+      if (await pythonPilAvailable()) {
+        const dest = path.join(jobDir, path.basename(p).replace(/\.[^.]+$/, "") + "-repaired.png");
+        const r = await repairImageWithPil(p, dest);
+        if (r.ok) {
+          outputPaths.push(dest);
+          classification = "structural_repair";
+          summary = "Image repaired using PIL (truncated data tolerated)";
+        } else {
+          remaining.push(r.error ?? "PIL repair failed");
+          classification = "failed";
+          summary = "Image repair failed";
+        }
+      } else {
+        remaining.push("Python PIL not available");
+        classification = "failed";
       }
     } else if (method === "generic_copy") {
       const dest = path.join(jobDir, path.basename(p));

@@ -93,6 +93,17 @@ export async function identifyFile(inputPath: string, maxBytes?: number): Promis
     warnings.push(`file extension '${ext}' does not match detected format '${ft.ext}'`);
   }
   if (size === 0) warnings.push("file is empty");
+  // Image header fallback
+  if (!detected && size > 0) {
+    try {
+      const { parseImageHeader } = await import("../analysis/imageHeader.js");
+      const h = parseImageHeader(buf);
+      if (h) {
+        candidates.push({ ext: h.format, mime: `image/${h.format === "jpg" ? "jpeg" : h.format}`, evidence: "image header parse (fallback)" });
+        detected = { ext: h.format, mime: `image/${h.format === "jpg" ? "jpeg" : h.format}` };
+      }
+    } catch {}
+  }
   // Text heuristic
   if (!detected && size > 0) {
     const printable = buf.filter(b => b === 9 || b === 10 || b === 13 || (b >= 32 && b < 127)).length;
