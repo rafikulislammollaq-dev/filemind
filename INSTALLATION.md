@@ -1,4 +1,4 @@
-# FileMind Installation
+# RBC Installation
 
 ## Clone and install (for humans and AI agents)
 
@@ -42,8 +42,8 @@ The server uses stdio transport. Do not print logs to stdout.
         "type": "local",
         "command": ["node", "/absolute/path/to/filemind/dist/index.js"],
         "environment": {
-          "FILEMIND_ALLOWED_INPUTS": "/home/you,/tmp",
-          "FILEMIND_OUTPUT_DIR": "/tmp/filemind-output"
+          "RBC_ALLOWED_INPUTS": "/home/you,/tmp",
+          "RBC_OUTPUT_DIR": "/tmp/rbc-output"
         }
       }
     }
@@ -66,8 +66,8 @@ Or in `~/.claude.json`:
       "command": "node",
       "args": ["/absolute/path/to/filemind/dist/index.js"],
       "env": {
-        "FILEMIND_ALLOWED_INPUTS": "/home/you,/tmp",
-        "FILEMIND_OUTPUT_DIR": "/tmp/filemind-output"
+        "RBC_ALLOWED_INPUTS": "/home/you,/tmp",
+        "RBC_OUTPUT_DIR": "/tmp/rbc-output"
       }
     }
   }

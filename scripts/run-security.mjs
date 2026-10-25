@@ -24,7 +24,7 @@ await test("rejects archive path traversal", async () => {
 });
 await test("output dir within root", async () => {
   const d = resolveOutputDir("nested/dir");
-  assert.ok(d.includes("filemind-output"));
+  assert.ok(d.includes("rbc-output"));
 });
 
 console.log(`\nSecurity: ${passed} passed, ${failed} failed`);

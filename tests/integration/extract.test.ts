@@ -8,7 +8,7 @@ describe("extraction", () => {
     const r = await extractContent("tests/fixtures/sample.pdf", "tests/out2", ["text"]);
     expect(r.items.length).toBeGreaterThan(0);
     const txt = fs.readFileSync(r.items[0].path, "utf8");
-    expect(txt).toContain("Hello FileMind");
+    expect(txt).toContain("Hello RBC");
   });
   it("extracts zip entries", async () => {
     // create zip

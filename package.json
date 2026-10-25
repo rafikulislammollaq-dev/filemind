@@ -1,7 +1,8 @@
 {
-  "name": "filemind",
+  "name": "rbc",
+  "mcpName": "io.github.rafikulislammollaq-dev/rbc",
   "version": "1.0.0",
-  "description": "",
+  "description": "RBC — Read Broken Corrupted: AI file intelligence, forensics & recovery MCP",
   "bin": {
     "filemind": "dist/index.js"
   },

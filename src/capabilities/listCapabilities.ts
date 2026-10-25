@@ -42,7 +42,7 @@ export async function listCapabilities() {
   }
 
   return {
-    product: "FileMind",
+    product: "RBC",
     version: "0.1.0",
     platform: `${os.platform()} ${os.arch()}`,
     node: process.version,

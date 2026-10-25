@@ -117,13 +117,13 @@ export async function investigateFile(inputPath: string, goal = "investigate", m
     final_assessment: integrity ? `File integrity assessed as ${integrity.integrity}. ${integrity.findings?.length ?? 0} findings.` : "No integrity assessment available.",
   };
   // write report
-  const outDir = outputDir ? path.resolve(outputDir) : path.join(process.cwd(), "filemind-reports");
+  const outDir = outputDir ? path.resolve(outputDir) : path.join(process.cwd(), "rbc-reports");
   fs.mkdirSync(outDir, { recursive: true });
   const reportPath = path.join(outDir, `${jobId}.json`);
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
   // also md summary
   const mdPath = path.join(outDir, `${jobId}.md`);
-  const md = `# FileMind Investigation Report\n\n- Job: ${jobId}\n- File: ${p}\n- SHA-256: ${report.sha256}\n- Detected: ${id?.detected?.ext ?? id?.extension}\n- Integrity: ${integrity?.integrity ?? "unknown"}\n\n## Steps\n${steps.map(s => `- ${s.step}: ${s.status} - ${s.summary}`).join("\n")}\n\n## Outputs\n${outputs.map(o => `- ${o}`).join("\n")}\n\n## Warnings\n${warnings.map(w => `- ${w}`).join("\n")}\n`;
+  const md = `# RBC Investigation Report\n\n- Job: ${jobId}\n- File: ${p}\n- SHA-256: ${report.sha256}\n- Detected: ${id?.detected?.ext ?? id?.extension}\n- Integrity: ${integrity?.integrity ?? "unknown"}\n\n## Steps\n${steps.map(s => `- ${s.step}: ${s.status} - ${s.summary}`).join("\n")}\n\n## Outputs\n${outputs.map(o => `- ${o}`).join("\n")}\n\n## Warnings\n${warnings.map(w => `- ${w}`).join("\n")}\n`;
   fs.writeFileSync(mdPath, md);
   outputs.push(reportPath, mdPath);
 

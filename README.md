@@ -1,6 +1,6 @@
-# FileMind — AI File Intelligence, Forensics & Recovery MCP
+# RBC — AI File Intelligence, Forensics & Recovery MCP
 
-FileMind is a local-first Model Context Protocol (MCP) server that gives AI agents the ability to investigate, inspect, extract, diagnose, and recover information from files.
+RBC is a local-first Model Context Protocol (MCP) server that gives AI agents the ability to investigate, inspect, extract, diagnose, and recover information from files.
 
 ## What it does today
 
@@ -44,8 +44,8 @@ The server communicates over stdio (MCP).
       "command": "node",
       "args": ["C:/path/to/filemind/dist/index.js"],
       "env": {
-        "FILEMIND_ALLOWED_INPUTS": "C:/Users/you,C:/tmp",
-        "FILEMIND_OUTPUT_DIR": "C:/tmp/filemind-output"
+        "RBC_ALLOWED_INPUTS": "C:/Users/you,C:/tmp",
+        "RBC_OUTPUT_DIR": "C:/tmp/rbc-output"
       }
     }
   }
@@ -54,11 +54,11 @@ The server communicates over stdio (MCP).
 
 ## Environment variables
 
-- `FILEMIND_ALLOWED_INPUTS` — comma/semicolon separated allowed input roots (default: cwd, home, temp).
-- `FILEMIND_OUTPUT_DIR` — output root (default: temp/filemind-output).
-- `FILEMIND_TEMP_DIR` — temp root.
-- `FILEMIND_MAX_INPUT_BYTES` — max input file size (default 100MB).
-- `FILEMIND_MAX_OUTPUT_BYTES`, `FILEMIND_MAX_EXTRACTED_ITEMS`, `FILEMIND_MAX_ARCHIVE_DEPTH`, `FILEMIND_MAX_RUNTIME_MS`, `FILEMIND_MAX_INSPECT_BYTES`, `FILEMIND_MAX_BINARY_OUTPUT_BYTES`.
+- `RBC_ALLOWED_INPUTS` — comma/semicolon separated allowed input roots (default: cwd, home, temp).
+- `RBC_OUTPUT_DIR` — output root (default: temp/rbc-output).
+- `RBC_TEMP_DIR` — temp root.
+- `RBC_MAX_INPUT_BYTES` — max input file size (default 100MB).
+- `RBC_MAX_OUTPUT_BYTES`, `RBC_MAX_EXTRACTED_ITEMS`, `RBC_MAX_ARCHIVE_DEPTH`, `RBC_MAX_RUNTIME_MS`, `RBC_MAX_INSPECT_BYTES`, `RBC_MAX_BINARY_OUTPUT_BYTES`.
 
 ## Tools
 

@@ -39,7 +39,7 @@ async function test(name, fn) {
 await test("initialize", async () => {
   rpc(proc, { jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2024-11-05", capabilities: {}, clientInfo: { name: "e2e", version: "1" } } });
   const r = await collect(proc, 1);
-  assert.equal(r.result.serverInfo.name, "filemind");
+  assert.equal(r.result.serverInfo.name, "rbc");
 });
 
 await test("tools/list", async () => {

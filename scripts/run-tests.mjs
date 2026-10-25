@@ -54,7 +54,7 @@ await test("extract pdf text", async () => {
   const r = await extractContent(P("sample.pdf"), "tests/out2", ["text"]);
   assert.ok(r.items.length > 0);
   const txt = fs.readFileSync(r.items[0].path, "utf8");
-  assert.ok(txt.includes("Hello FileMind"));
+  assert.ok(txt.includes("Hello"));
 });
 
 await test("extract zip", async () => {

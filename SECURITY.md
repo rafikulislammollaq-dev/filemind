@@ -4,8 +4,8 @@
 Email the maintainer or open a private security advisory. Do not file public issues for undisclosed vulnerabilities.
 
 ## Security model
-- Input paths restricted to configured roots (`FILEMIND_ALLOWED_INPUTS`).
-- All writes confined to output root (`FILEMIND_OUTPUT_DIR`).
+- Input paths restricted to configured roots (`RBC_ALLOWED_INPUTS`).
+- All writes confined to output root (`RBC_OUTPUT_DIR`).
 - Path traversal rejected in inputs and archive entries.
 - Symlink escapes rejected via realpath checks.
 - File size, item count, archive depth, runtime limits enforced.

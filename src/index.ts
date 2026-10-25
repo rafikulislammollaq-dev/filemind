@@ -17,7 +17,7 @@ import { analyzeSoftware } from "./analysis/software.js";
 import { listCapabilities } from "./capabilities/listCapabilities.js";
 import { CONFIG, validateConfig } from "./config.js";
 
-const server = new McpServer({ name: "filemind", version: "0.1.0" });
+const server = new McpServer({ name: "rbc", version: "1.0.0" });
 
 function wrap(fn: () => Promise<any>) {
   return fn().catch((e: any) => fail("tool", e?.message ?? String(e), { code: e?.code }));
@@ -209,13 +209,13 @@ async function main() {
     logger.error("Invalid configuration", problems);
     process.exit(1);
   }
-  logger.info("FileMind starting");
+  logger.info("RBC starting");
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  logger.info("FileMind connected");
+  logger.info("RBC connected");
 }
 
 main().catch((e) => {
-  console.error("FileMind failed to start:", e);
+  console.error("RBC failed to start:", e);
   process.exit(1);
 });
