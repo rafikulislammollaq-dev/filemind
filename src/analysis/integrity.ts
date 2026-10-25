@@ -159,6 +159,18 @@ export async function analyzeIntegrity(inputPath: string, strictness = "normal")
         try { JSON.parse(text); findings.push("JSON parses successfully"); integrity = "valid"; }
         catch (e: any) { errors.push(`JSON parse failed: ${e?.message}`); integrity = "invalid"; severity = "high"; }
       }
+      // YAML parse
+      if (ext === "yaml" || ext === "yml") {
+        try {
+          const yaml = await import("js-yaml");
+          (yaml as any).load(text);
+          findings.push("YAML parses successfully");
+          integrity = "valid";
+        } catch (e: any) {
+          errors.push(`YAML parse failed: ${e?.message ?? e}`);
+          integrity = "invalid"; severity = "high";
+        }
+      }
       // XML parse
       if (ext === "xml" || ext === "html") {
         // basic tag balance not full; report

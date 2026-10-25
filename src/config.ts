@@ -41,4 +41,18 @@ export function loadConfig(): FileMindConfig {
   };
 }
 
+export function validateConfig(c: FileMindConfig): string[] {
+  const problems: string[] = [];
+  if (c.maxInputBytes <= 0) problems.push("maxInputBytes must be > 0");
+  if (c.maxOutputBytes <= 0) problems.push("maxOutputBytes must be > 0");
+  if (c.maxExtractedItems <= 0) problems.push("maxExtractedItems must be > 0");
+  if (c.maxArchiveDepth <= 0) problems.push("maxArchiveDepth must be > 0");
+  if (!c.allowedInputRoots.length) problems.push("allowedInputRoots must not be empty");
+  for (const r of c.allowedInputRoots) {
+    if (!path.isAbsolute(r)) problems.push(`allowed root not absolute: ${r}`);
+  }
+  if (!path.isAbsolute(c.outputRoot)) problems.push("outputRoot must be absolute");
+  return problems;
+}
+
 export const CONFIG = loadConfig();

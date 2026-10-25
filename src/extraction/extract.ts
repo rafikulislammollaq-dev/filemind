@@ -127,7 +127,31 @@ export async function extractContent(inputPath: string, outputDir?: string, cont
     } catch (e: any) { failed.push({ item: ext, error: e?.message ?? String(e) }); }
   }
 
-  // Manifest/provenance
+  // Tar archives
+  if (ext === "tar" || ext === "tgz" || p.toLowerCase().endsWith(".tar.gz") || p.toLowerCase().endsWith(".tar.bz2")) {
+    try {
+      const { execFile } = await import("node:child_process");
+      const { promisify } = await import("node:util");
+      const exec = promisify(execFile);
+      const archDir = path.join(jobDir, "tar-entries");
+      fs.mkdirSync(archDir, { recursive: true });
+      await exec("tar", ["-xf", p, "-C", archDir], { timeout: 60000 });
+      // walk extracted files
+      function walk(dir: string) {
+        for (const name of fs.readdirSync(dir)) {
+          const full = path.join(dir, name);
+          const st = fs.statSync(full);
+          if (st.isDirectory()) walk(full);
+          else {
+            if (items.length < maxItems && totalBytes + st.size <= maxTotalBytes) {
+              addItem("archive_entry", full, `tar entry: ${path.relative(archDir, full)}`);
+            }
+          }
+        }
+      }
+      walk(archDir);
+    } catch (e: any) { failed.push({ item: "tar", error: e?.message ?? String(e) }); }
+  }
   const manifest = {
     created_at: nowIso(),
     input_path: p,

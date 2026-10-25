@@ -10,7 +10,7 @@
     "prebuild": "npm run deps:check",
     "build": "tsc",
     "pretest": "npm run deps:check",
-    "test": "node scripts/run-tests.mjs && node scripts/run-security.mjs",
+    "test": "node scripts/run-tests.mjs && node scripts/run-security.mjs && node scripts/run-e2e.mjs",
     "start": "node dist/index.js"
   },
   "engines": {
@@ -27,6 +27,7 @@
     "chardet": "^2.2.0",
     "file-type": "^22.2.0",
     "iconv-lite": "^0.7.3",
+    "js-yaml": "^5.5.0",
     "jszip": "^3.10.2",
     "mime-types": "^3.0.2",
     "pdf-parse": "^2.4.5",
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "@types/adm-zip": "^0.5.8",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^26.6.5",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5"

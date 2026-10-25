@@ -15,7 +15,7 @@ import { analyzeEmbeddedContent } from "./analysis/embedded.js";
 import { investigateFile, getJob } from "./orchestration/investigate.js";
 import { analyzeSoftware } from "./analysis/software.js";
 import { listCapabilities } from "./capabilities/listCapabilities.js";
-import { CONFIG } from "./config.js";
+import { CONFIG, validateConfig } from "./config.js";
 
 const server = new McpServer({ name: "filemind", version: "0.1.0" });
 
@@ -201,9 +201,18 @@ server.registerTool("analyze_software", {
   return ok("analyze_software", res as any);
 }));
 
+import { logger } from "./util/logger.js";
+
 async function main() {
+  const problems = validateConfig(CONFIG);
+  if (problems.length) {
+    logger.error("Invalid configuration", problems);
+    process.exit(1);
+  }
+  logger.info("FileMind starting");
   const transport = new StdioServerTransport();
   await server.connect(transport);
+  logger.info("FileMind connected");
 }
 
 main().catch((e) => {

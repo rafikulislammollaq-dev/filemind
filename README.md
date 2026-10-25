@@ -92,7 +92,7 @@ Tier 3: APK/JAR (ZIP-based), ELF/PE (identification).
 npm test
 ```
 
-18 integration checks + 3 security checks currently pass.
+25 tests (18 integration + 3 security + 4 e2e) currently pass.
 
 ## License
 
