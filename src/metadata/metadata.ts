@@ -133,6 +133,18 @@ export async function inspectMetadata(inputPath: string, maxItems = 200): Promis
         const eType = ei_data === 2 ? (buf[typeOff] << 8) | buf[typeOff+1] : buf[typeOff] | (buf[typeOff+1] << 8);
         const types: Record<number,string> = { 1: "relocatable", 2: "executable", 3: "shared object", 4: "core" };
         fields.push({ key: "elf.type", value: types[eType] ?? eType, source: "binary parse" });
+        // section/program header counts
+        if (ei_class === 1) {
+          const shnum = buf.readUInt16LE(48);
+          const phnum = buf.readUInt16LE(44);
+          fields.push({ key: "elf.section_header_count", value: shnum, source: "binary parse" });
+          fields.push({ key: "elf.program_header_count", value: phnum, source: "binary parse" });
+        } else if (ei_class === 2) {
+          const shnum = buf.readUInt16LE(60);
+          const phnum = buf.readUInt16LE(56);
+          fields.push({ key: "elf.section_header_count", value: shnum, source: "binary parse" });
+          fields.push({ key: "elf.program_header_count", value: phnum, source: "binary parse" });
+        }
       } else if (buf.length >= 2 && buf[0] === 0x4D && buf[1] === 0x5A) {
         // PE
         const peOffset = buf.readUInt32LE(0x3C);
@@ -144,6 +156,17 @@ export async function inspectMetadata(inputPath: string, maxItems = 200): Promis
           fields.push({ key: "pe.machine", value: machines[machine] ?? machine, source: "binary parse" });
           const numSections = buf.readUInt16LE(peOffset + 6);
           fields.push({ key: "pe.number_of_sections", value: numSections, source: "binary parse" });
+          // section table
+          const optHeaderSize = buf.readUInt16LE(peOffset + 20);
+          const sectionTableOff = peOffset + 24 + optHeaderSize;
+          const sections: string[] = [];
+          for (let i = 0; i < numSections && i < 96; i++) {
+            const off = sectionTableOff + i * 40;
+            if (off + 8 > buf.length) break;
+            const name = buf.toString("ascii", off, off + 8).replace(/\0/g, "");
+            sections.push(name);
+          }
+          fields.push({ key: "pe.sections", value: sections, source: "binary parse" });
         }
       }
     } catch (e: any) {
@@ -189,6 +212,12 @@ export async function inspectMetadata(inputPath: string, maxItems = 200): Promis
         const size = (buf[6] << 21) | (buf[7] << 14) | (buf[8] << 7) | buf[9];
         fields.push({ key: "mp3.id3_tag_size", value: size, source: "binary parse" });
       }
+      // frame count heuristic
+      let frames = 0;
+      for (let i = 0; i < buf.length - 1; i++) {
+        if (buf[i] === 0xFF && (buf[i+1] & 0xE0) === 0xE0) frames++;
+      }
+      fields.push({ key: "mp3.frame_sync_count", value: frames, source: "binary parse" });
     } catch (e: any) { errors.push(`mp3 parse failed: ${e?.message ?? e}`); }
   }
   // MP4/MOV
@@ -208,6 +237,18 @@ export async function inspectMetadata(inputPath: string, maxItems = 200): Promis
       }
       fields.push({ key: "mp4.top_level_boxes", value: boxes, source: "binary parse" });
     } catch (e: any) { errors.push(`media parse failed: ${e?.message ?? e}`); }
+  }
+
+  // APK
+  if (ext === "apk" || id.detected?.ext === "apk") {
+    try {
+      const { inspectApk } = await import("../analysis/apk.js");
+      const info = await inspectApk(p);
+      fields.push({ key: "apk.entry_count", value: info.entries.length, source: "adm-zip" });
+      fields.push({ key: "apk.manifest_strings", value: info.manifestStrings.slice(0, 100), source: "binary xml parse" });
+      const perms = info.manifestStrings.filter((s: string) => s.startsWith("android.permission."));
+      fields.push({ key: "apk.permissions", value: perms, source: "binary xml parse" });
+    } catch (e: any) { errors.push(`apk inspection failed: ${e?.message ?? e}`); }
   }
 
   if (!["jpg","jpeg","png","gif","webp","bmp","tiff","tif","pdf","zip","txt","md","json","xml","yaml","yml","csv","log","js","ts","py","html","wav","mp3","mp4","mov","m4a","mkv","webm","sqlite","db","elf","exe","dll","docx","xlsx","pptx"].includes(ext) && !id.detected) {

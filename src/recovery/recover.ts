@@ -128,6 +128,44 @@ export async function recoverFile(inputPath: string, outputDir?: string, strateg
         remaining.push("sqlite3 CLI not available");
         classification = "failed";
       }
+    } else if (method === "pdf_repair") {
+      const { repairPdf } = await import("./pdfRepair.js");
+      const buf = fs.readFileSync(p);
+      const r = repairPdf(buf);
+      if (!r.ok) { remaining.push(r.error ?? "repair failed"); classification = "failed"; }
+      else {
+        const dest = path.join(jobDir, path.basename(p));
+        fs.writeFileSync(dest, r.output);
+        outputPaths.push(dest);
+        // validate
+        try {
+          const { PDFParse } = await import("pdf-parse");
+          const parser = new PDFParse({ data: r.output });
+          const textRes = await parser.getText();
+          classification = "structural_repair";
+          summary = `PDF repaired; parsed ${(textRes.pages||[]).length} pages`;
+        } catch (e: any) {
+          classification = "partial";
+          summary = "PDF repaired structurally but parsing still fails";
+          remaining.push(e?.message ?? String(e));
+        }
+        dataLoss.push(...r.notes);
+      }
+    } else if (method === "image_transcode") {
+      try {
+        const sharp = (await import("sharp")).default;
+        const meta = await sharp(p).metadata();
+        const fmt = meta.format || "png";
+        const dest = path.join(jobDir, path.basename(p).replace(/\.[^.]+$/, "") + "-transcoded." + fmt);
+        await sharp(p).toFile(dest);
+        outputPaths.push(dest);
+        classification = "structural_repair";
+        summary = `Image transcoded to ${fmt} (${meta.width}x${meta.height})`;
+      } catch (e: any) {
+        remaining.push(e?.message ?? String(e));
+        classification = "failed";
+        summary = "Image transcode failed";
+      }
     } else if (method === "generic_copy") {
       const dest = path.join(jobDir, path.basename(p));
       fs.copyFileSync(p, dest);

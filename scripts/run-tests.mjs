@@ -133,5 +133,16 @@ await test("get job report", async () => {
   assert.ok(j);
   assert.equal(j.job_id, r.job_id);
 });
+await test("pdf repair", async () => {
+  const r = await recoverFile(P("trunc.pdf"), "tests/out2", "pdf_repair");
+  // may be failed or partial; just ensure no crash and output path if success
+  assert.ok(r.classification);
+});
+
+await test("image transcode", async () => {
+  const r = await recoverFile(P("sample.png"), "tests/out2", "image_transcode");
+  assert.equal(r.classification, "structural_repair");
+  assert.ok(r.output_paths.length > 0);
+});
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed > 0 ? 1 : 0);

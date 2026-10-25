@@ -6,6 +6,7 @@
     "filemind": "dist/index.js"
   },
   "scripts": {
+    "setup": "npm ci && npm run build && npm test",
     "deps:check": "node scripts/check-dependency-install.mjs",
     "prebuild": "npm run deps:check",
     "build": "tsc",
