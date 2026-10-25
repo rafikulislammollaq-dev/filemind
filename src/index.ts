@@ -13,6 +13,7 @@ import { recoverFile } from "./recovery/recover.js";
 import { validateRecovery } from "./recovery/validate.js";
 import { analyzeEmbeddedContent } from "./analysis/embedded.js";
 import { investigateFile, getJob } from "./orchestration/investigate.js";
+import { analyzeSoftware } from "./analysis/software.js";
 import { listCapabilities } from "./capabilities/listCapabilities.js";
 import { CONFIG } from "./config.js";
 
@@ -185,6 +186,19 @@ server.registerTool("list_capabilities", {
 }, async () => wrap(async () => {
   const res = await listCapabilities();
   return ok("list_capabilities", res as any);
+}));
+
+// analyze_software
+server.registerTool("analyze_software", {
+  description: "Optional software/binary analysis using available reverse-engineering tools (jadx, rizin).",
+  inputSchema: {
+    path: z.string(),
+    output_dir: z.string().optional(),
+    timeout_seconds: z.number().optional(),
+  },
+}, async ({ path: p, output_dir, timeout_seconds }) => wrap(async () => {
+  const res = await analyzeSoftware(p, output_dir, (timeout_seconds ?? 300) * 1000);
+  return ok("analyze_software", res as any);
 }));
 
 async function main() {

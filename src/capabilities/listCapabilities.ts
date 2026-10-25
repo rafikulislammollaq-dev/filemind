@@ -27,6 +27,20 @@ export async function listCapabilities() {
     deps.push({ name: cmd, available: r.available, version: r.version, notes: "external command" });
   }
 
+  // reverse engineering tools
+  const { execFile } = await import("node:child_process");
+  const { promisify } = await import("node:util");
+  const execFileAsync = promisify(execFile);
+  for (const cmd of ["jadx", "rizin"]) {
+    try {
+      const args = cmd === "jadx" ? ["--version"] : ["-v"];
+      const { stdout } = await execFileAsync(cmd, args, { timeout: 15000, shell: cmd === "jadx" });
+      deps.push({ name: cmd, available: true, version: String(stdout).trim().split("\n")[0], notes: "external command (reverse engineering)" });
+    } catch {
+      deps.push({ name: cmd, available: false, notes: "external command (reverse engineering)" });
+    }
+  }
+
   return {
     product: "FileMind",
     version: "0.1.0",
@@ -54,7 +68,8 @@ export async function listCapabilities() {
       validate_recovery: true,
       investigate_file: true,
       get_recovery_report: true,
-      list_capabilities: true,
+      analyze_software: true,
+    list_capabilities: true,
     },
     notes: [
       "Core functionality works with bundled npm dependencies.",
