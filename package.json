@@ -1,0 +1,42 @@
+{
+  "name": "filemind",
+  "version": "1.0.0",
+  "description": "",
+  "bin": {
+    "filemind": "dist/index.js"
+  },
+  "scripts": {
+    "deps:check": "node scripts/check-dependency-install.mjs",
+    "prebuild": "npm run deps:check",
+    "build": "tsc",
+    "pretest": "npm run deps:check",
+    "test": "node scripts/run-tests.mjs && node scripts/run-security.mjs",
+    "start": "node dist/index.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "npm@11.21.1",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "adm-zip": "^0.6.1",
+    "chardet": "^2.2.0",
+    "file-type": "^22.2.0",
+    "iconv-lite": "^0.7.3",
+    "jszip": "^3.10.2",
+    "mime-types": "^3.0.2",
+    "pdf-parse": "^2.4.5",
+    "sharp": "^0.35.5",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.8",
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

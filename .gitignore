@@ -1,0 +1,9 @@
+node_modules/
+dist/
+tests/out/
+tests/out2/
+*.log
+.env
+.DS_Store
+Thumbs.db
+filemind-reports/
