@@ -68,7 +68,8 @@ export async function listCapabilities() {
       validate_recovery: true,
       investigate_file: true,
       get_recovery_report: true,
-      analyze_software: true,
+      analyze_entropy: true,
+    analyze_software: true,
     list_capabilities: true,
     },
     notes: [

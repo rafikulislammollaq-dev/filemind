@@ -14,6 +14,7 @@ import { validateRecovery } from "./recovery/validate.js";
 import { analyzeEmbeddedContent } from "./analysis/embedded.js";
 import { investigateFile, getJob } from "./orchestration/investigate.js";
 import { analyzeSoftware } from "./analysis/software.js";
+import { analyzeEntropy } from "./analysis/entropy.js";
 import { listCapabilities } from "./capabilities/listCapabilities.js";
 import { CONFIG, validateConfig } from "./config.js";
 
@@ -202,6 +203,15 @@ server.registerTool("analyze_software", {
 }));
 
 import { logger } from "./util/logger.js";
+
+// analyze_entropy
+server.registerTool("analyze_entropy", {
+  description: "Compute Shannon entropy to detect packed/encrypted/compressed content.",
+  inputSchema: { path: z.string(), chunk_size: z.number().optional() },
+}, async ({ path: p, chunk_size }) => wrap(async () => {
+  const res = await analyzeEntropy(p, chunk_size ?? 4096);
+  return ok("analyze_entropy", res as any);
+}));
 
 async function main() {
   const problems = validateConfig(CONFIG);

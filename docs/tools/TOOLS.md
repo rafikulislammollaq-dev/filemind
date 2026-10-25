@@ -34,6 +34,9 @@ Bounded multi-step workflow producing JSON + Markdown report.
 ## get_recovery_report
 Retrieve a prior job by ID.
 
+## analyze_entropy
+Compute Shannon entropy to detect packed/encrypted/compressed content.
+
 ## analyze_software
 Optional reverse-engineering via jadx/rizin.
 

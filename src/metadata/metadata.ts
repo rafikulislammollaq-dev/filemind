@@ -152,13 +152,49 @@ export async function inspectMetadata(inputPath: string, maxItems = 200): Promis
         if (ei_class === 1) {
           const shnum = buf.readUInt16LE(48);
           const phnum = buf.readUInt16LE(44);
+          const shoff = buf.readUInt32LE(32);
+          const shstrndx = buf.readUInt16LE(50);
+          const shentsize = buf.readUInt16LE(46);
           fields.push({ key: "elf.section_header_count", value: shnum, source: "binary parse" });
           fields.push({ key: "elf.program_header_count", value: phnum, source: "binary parse" });
+          // section names
+          if (shoff && shstrndx < shnum) {
+            const strTabOff = shoff + shstrndx * shentsize;
+            const strTabAddr = buf.readUInt32LE(strTabOff + 16); // sh_offset
+            const names: string[] = [];
+            for (let i = 0; i < shnum; i++) {
+              const hdr = shoff + i * shentsize;
+              const nameIdx = buf.readUInt32LE(hdr);
+              const type = buf.readUInt32LE(hdr + 4);
+              let name = "";
+              let j = strTabAddr + nameIdx;
+              while (j < buf.length && buf[j] !== 0) { name += String.fromCharCode(buf[j]); j++; }
+              if (name) names.push(name);
+            }
+            fields.push({ key: "elf.section_names", value: names, source: "binary parse" });
+          }
         } else if (ei_class === 2) {
           const shnum = buf.readUInt16LE(60);
           const phnum = buf.readUInt16LE(56);
+          const shoff = Number(buf.readBigUInt64LE(40));
+          const shstrndx = buf.readUInt16LE(62);
+          const shentsize = buf.readUInt16LE(58);
           fields.push({ key: "elf.section_header_count", value: shnum, source: "binary parse" });
           fields.push({ key: "elf.program_header_count", value: phnum, source: "binary parse" });
+          if (shoff && shstrndx < shnum) {
+            const strTabOff = shoff + shstrndx * shentsize;
+            const strTabAddr = Number(buf.readBigUInt64LE(strTabOff + 24));
+            const names: string[] = [];
+            for (let i = 0; i < shnum; i++) {
+              const hdr = shoff + i * shentsize;
+              const nameIdx = buf.readUInt32LE(hdr);
+              let name = "";
+              let j = strTabAddr + nameIdx;
+              while (j < buf.length && buf[j] !== 0) { name += String.fromCharCode(buf[j]); j++; }
+              if (name) names.push(name);
+            }
+            fields.push({ key: "elf.section_names", value: names, source: "binary parse" });
+          }
         }
       } else if (buf.length >= 2 && buf[0] === 0x4D && buf[1] === 0x5A) {
         // PE
@@ -182,6 +218,16 @@ export async function inspectMetadata(inputPath: string, maxItems = 200): Promis
             sections.push(name);
           }
           fields.push({ key: "pe.sections", value: sections, source: "binary parse" });
+          // imports
+          try {
+            const { parsePeImports } = await import("../analysis/peImports.js");
+            const imports = parsePeImports(buf);
+            fields.push({ key: "pe.imports", value: imports.map(i => i.dll), source: "binary parse" });
+            fields.push({ key: "pe.import_count", value: imports.length, source: "binary parse" });
+            for (const imp of imports.slice(0, 20)) {
+              fields.push({ key: `pe.imports.${imp.dll}`, value: imp.functions.slice(0, 20), source: "binary parse" });
+            }
+          } catch {}
         }
       }
     } catch (e: any) {
